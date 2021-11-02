@@ -55,8 +55,10 @@ if __name__ == '__main__':
     
         train_pars = {
             'n_classes'     : 10 + 1,
-            'model_name'    : 'UNet', 
-            'backbone'      : 'efficientnet-b3', 
+            # 'model_name'    : 'UNet', 
+            'model_name'    : 'PSPNet',
+            # 'backbone'      : 'efficientnet-b3',
+            'backbone'      : 'resnet34',
             'activation'    : 'softmax2d',
             'image_mode'    : image_mode,
         }

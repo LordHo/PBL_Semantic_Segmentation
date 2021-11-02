@@ -1,6 +1,7 @@
 import numpy as np
 
 import torch
+import torch.nn as nn
 import segmentation_models_pytorch as smp
 
 from UNet_Version.loss.bceLoss import BCE_loss
@@ -21,6 +22,7 @@ class Loss:
         self.iou_loss = 0.0
         self.classes_iou_loss = 0.0
         self.weighted_classes_iou_loss = 0.0
+        self.ce_loss = 0.0
 
     def setting(self):
         colors = {
@@ -43,15 +45,19 @@ class Loss:
         # self.dice_weights = np.array([0.5, 1, 1, 1.5, 1.5, 2, 4, 2, 2, 2, 3])
         # self.dice_weights = np.ones(11)
         # self.dice_weights[0] = 0
-        self.useBCE = True
-        self.useFocal = True
-        self.useDice = True
+        self.useBCE = False
+        self.useFocal = False
+        self.useDice = False
         self.useIoU = True
         self.useClassesIoU = False
         self.useWeightedClassesIoU = False
 
         self.focal_loss_function = smp.losses.FocalLoss(mode='multiclass')
         self.dice_loss_function = smp.losses.DiceLoss(mode='multiclass', classes=self.dice_weights)
+
+
+        self.useCE = True
+        self.cross_entropy = nn.CrossEntropyLoss()
 
     def sum_loss(self):
         if self.useBCE:
@@ -67,6 +73,8 @@ class Loss:
             self.seg_loss += self.classes_iou_loss
         if self.useWeightedClassesIoU:
             self.seg_loss += self.weighted_classes_iou_loss
+        if self.useCE:
+            self.seg_loss += self.ce_loss
 
     def trans_y(self, y):
         y_ = y.type(torch.cuda.LongTensor)
@@ -91,6 +99,9 @@ class Loss:
             self.calculate_classes_iou_loss(output, y)
         if self.useWeightedClassesIoU:
                 self.calculate_weighted_classes_iou_loss(output, y)
+        if self.useCE:
+            self.calculate_ce_loss(output, y)
+        
         self.sum_loss()
 
         return self.seg_loss
@@ -120,6 +131,9 @@ class Loss:
 
     def calculate_weighted_classes_iou_loss(self, output, y):
         self.weighted_classes_iou_loss = weighted_classes_IOU_loss(output, y)
+
+    def calculate_ce_loss(self, output, y):
+        self.ce_loss = self.cross_entropy(output, y)
     
     def print_used_losses(self):
         losses = []
@@ -135,6 +149,8 @@ class Loss:
             losses.append('CIoU')
         if self.useWeightedClassesIoU:
             losses.append('WCIoU')
+        if self.useCE:
+            losses.append('CE')
         message = ', '.join(losses)
         return message
 
