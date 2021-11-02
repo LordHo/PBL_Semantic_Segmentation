@@ -1,0 +1,15 @@
+0814_Test_prepare
+check_train_data
+compute_IoU
+dataset
+ground truth table
+old items
+others static
+redraw
+refactor-0821/__pycache__
+refactor-0821/*.txt
+refactor-0821/UNet_Version/loss/__pycache__
+refactor-0821/UNet_Version/loss/msssimLoss.py
+refactor-0821/UNet_Version/models
+result
+special partitions
