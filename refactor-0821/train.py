@@ -29,6 +29,7 @@ class EpochInfo:
         self.epoch_iou_loss = 0.0
         self.epoch_classes_iou_loss = 0.0
         self.epoch_weighted_classes_iou_loss = 0.0
+        self.epoch_ce_loss = 0.0
 
     def epoch_message(self, epoch_info, batch_num, epoch, last_lr):
         list_ = [f"Epoch {epoch:2d}"]
@@ -77,6 +78,10 @@ class EpochInfo:
                 weighted_classes_iou = f'WCIoU: {1 - epoch_info.epoch_weighted_classes_iou_loss/batch_num:.3f}'
                 list_.append(weighted_classes_iou)
 
+        if self.epoch_ce_loss > 0.0:
+            ce_message  = f'CE: {epoch_info.epoch_ce_loss/batch_num:.3f}'
+            list_.append(ce_message)
+
         last_lr_message = f'lr: {last_lr:.1e}'
         list_.append(last_lr_message)
         
@@ -111,6 +116,8 @@ def epoch_training(epoch, model, dataloader, loss, epoch_info):
         epoch_info.epoch_iou_loss += loss.iou_loss
         epoch_info.epoch_classes_iou_loss += loss.classes_iou_loss
         epoch_info.epoch_weighted_classes_iou_loss += loss.weighted_classes_iou_loss
+
+        epoch_info.epoch_ce_loss += loss.ce_loss
         
         batch_num = batch_index+1
 
