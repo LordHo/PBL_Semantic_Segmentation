@@ -13,3 +13,4 @@ refactor-0821/UNet_Version/loss/msssimLoss.py
 refactor-0821/UNet_Version/models
 result
 special partitions
+*.PNG
