@@ -7,6 +7,7 @@ from dataset import *
 from loss import Loss
 from test import testing
 
+
 class EpochInfo:
     def __init__(self, setting_epochs):
         self.epochs = setting_epochs
@@ -20,7 +21,7 @@ class EpochInfo:
 
     def reset(self):
         self.save_model = False
-    
+
     def resetepochloss(self):
         self.training_loss = 0.0
         self.epoch_bce_loss = 0.0
@@ -40,24 +41,24 @@ class EpochInfo:
             list_.append(train_loss_message)
 
         if self.epoch_bce_loss > 0.0:
-            bce_loss_message   = f'Bce: {epoch_info.epoch_bce_loss/batch_num:.3f}'
+            bce_loss_message = f'Bce: {epoch_info.epoch_bce_loss/batch_num:.3f}'
             list_.append(bce_loss_message)
 
-        if self.epoch_focal_loss > 0.0: 
-            focal_message  = f'Focal: {epoch_info.epoch_focal_loss/batch_num:.3f}'
+        if self.epoch_focal_loss > 0.0:
+            focal_message = f'Focal: {epoch_info.epoch_focal_loss/batch_num:.3f}'
             list_.append(focal_message)
 
         if self.epoch_dice_loss > 0.0:
-            dice_message   = f'Dice: {epoch_info.epoch_dice_loss/batch_num:.3f}'
+            dice_message = f'Dice: {epoch_info.epoch_dice_loss/batch_num:.3f}'
             list_.append(dice_message)
 
         if self.epoch_iou_loss > 0.0:
             print_iou_loss = False
             if print_iou_loss:
-                iou_loss_message   = f'IoU loss: {epoch_info.epoch_iou_loss/batch_num:.3f}'
+                iou_loss_message = f'IoU loss: {epoch_info.epoch_iou_loss/batch_num:.3f}'
                 list_.append(iou_loss_message)
             else:
-                iou_message        = f'IoU: {1 - epoch_info.epoch_iou_loss/batch_num:.3f}'
+                iou_message = f'IoU: {1 - epoch_info.epoch_iou_loss/batch_num:.3f}'
                 list_.append(iou_message)
 
         if self.epoch_classes_iou_loss > 0.0:
@@ -79,14 +80,15 @@ class EpochInfo:
                 list_.append(weighted_classes_iou)
 
         if self.epoch_ce_loss > 0.0:
-            ce_message  = f'CE: {epoch_info.epoch_ce_loss/batch_num:.3f}'
+            ce_message = f'CE: {epoch_info.epoch_ce_loss/batch_num:.3f}'
             list_.append(ce_message)
 
         last_lr_message = f'lr: {last_lr:.1e}'
         list_.append(last_lr_message)
-        
+
         message = ', '.join(list_)
         return message
+
 
 def epoch_training(epoch, model, dataloader, loss, epoch_info):
     import time
@@ -100,7 +102,7 @@ def epoch_training(epoch, model, dataloader, loss, epoch_info):
         x, y = batch_image.to(model.device), batch_label.to(model.device)
         y = y.type(torch.cuda.FloatTensor)
 
-        model.optimizer.zero_grad() # reset the gradient to zero
+        model.optimizer.zero_grad()  # reset the gradient to zero
         output = model.model(x)
         loss.calculate_total_loss(output, y)
         """ Zero gradients, perform a backward pass, and update the weights. """
@@ -118,17 +120,19 @@ def epoch_training(epoch, model, dataloader, loss, epoch_info):
         epoch_info.epoch_weighted_classes_iou_loss += loss.weighted_classes_iou_loss
 
         epoch_info.epoch_ce_loss += loss.ce_loss
-        
+
         batch_num = batch_index+1
 
-        message = epoch_info.epoch_message(epoch_info, batch_num, epoch, last_lr)
-        
+        message = epoch_info.epoch_message(
+            epoch_info, batch_num, epoch, last_lr)
+
         pbar.set_description(message)
         pbar.refresh()
     print(message, file=epoch_info.log)
 
     if epoch_info.best_iou_loss > epoch_info.epoch_iou_loss + epoch_info.epoch_classes_iou_loss:
-        epoch_info.best_iou_loss = epoch_info.epoch_iou_loss + epoch_info.epoch_classes_iou_loss
+        epoch_info.best_iou_loss = epoch_info.epoch_iou_loss + \
+            epoch_info.epoch_classes_iou_loss
         epoch_info.epochs_no_progress = 0
         epoch_info.save_model = True
     else:
@@ -140,29 +144,29 @@ def epoch_training(epoch, model, dataloader, loss, epoch_info):
 
 
 def training(file_path, image_dir, label_dir, result_dir, model, image_mode, label_mode):
-    
+
     print(f'Device: {model.device}')
 
     dataset_pars = {
-        'file_path'     : file_path,
-        'image_dir'     : image_dir, 
-        'label_dir'     : label_dir, 
-        'resize'        : True,
-        'resize_height' : 512,
-        'resize_width'  : 512,
-        'repeat'        : 20, 
+        'file_path': file_path,
+        'image_dir': image_dir,
+        'label_dir': label_dir,
+        'resize': True,
+        'resize_height': 512,
+        'resize_width': 512,
+        'repeat': 20,
         # 'repeat': 1, # for test use
-        'n_classes'     : 10+1, 
-        'trans'         : True,
-        'image_mode'    : image_mode,
-        'label_mode'    : label_mode,
+        'n_classes': 10+1,
+        'trans': True,
+        'image_mode': image_mode,
+        'label_mode': label_mode,
     }
     train_dateset = TrainDataset(**dataset_pars)
 
     train_loader_pars = {
-        'dataset'   : train_dateset,
-        'batch_size': 4,
-        'shuffle'   : False
+        'dataset': train_dateset,
+        'batch_size': 3,
+        'shuffle': False
     }
     train_dataloader = DataLoader(**train_loader_pars)
 
@@ -191,7 +195,7 @@ def training(file_path, image_dir, label_dir, result_dir, model, image_mode, lab
         WCIoU_weights = loss.print_WCIoU_weights()
         print(f'WCIoU weights: {WCIoU_weights}.')
         print(f'WCIoU weights: {WCIoU_weights}.', file=epoch_info.log)
-    
+
     early_stop_limit = epoch_info.epochs
     # early_stop_limit = 10
     early_stop_epochs = -1
@@ -200,7 +204,8 @@ def training(file_path, image_dir, label_dir, result_dir, model, image_mode, lab
 
     for epoch in range(1, epoch_info.epochs+1, 1):
         model.model.train()
-        model, epoch_info = epoch_training(epoch, model, train_dataloader, loss, epoch_info)
+        model, epoch_info = epoch_training(
+            epoch, model, train_dataloader, loss, epoch_info)
         # train_loss_history.append(epoch_info.training_loss)
 
         if epoch_info.save_model:
@@ -209,7 +214,8 @@ def training(file_path, image_dir, label_dir, result_dir, model, image_mode, lab
             print(message, file=epoch_info.log)
             save_model_dir = os.path.join(result_dir, 'save_model')
             createDir(save_model_dir)
-            model_path = os.path.join(save_model_dir, f'{model.model_name}-best.pkl')
+            model_path = os.path.join(
+                save_model_dir, f'{model.model_name}-best.pkl')
             torch.save(model.model, model_path)
             model.best_model_path = model_path
 

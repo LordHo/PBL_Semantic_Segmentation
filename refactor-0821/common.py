@@ -53,11 +53,13 @@ class ModelSetting:
                              in_channels=self.in_channels,
                              classes=self.n_classes,
                              activation=self.activation)
+
         elif self.model_name == 'UNet++':
             model = smp.UnetPlusPlus(self.backbone,
                                      in_channels=self.in_channels,
                                      classes=self.n_classes,
                                      activation=self.activation)
+
         elif self.model_name == 'PSPNet':
             model = smp.PSPNet(
                 encoder_name=self.backbone,

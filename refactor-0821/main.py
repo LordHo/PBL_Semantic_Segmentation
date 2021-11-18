@@ -14,7 +14,8 @@ def main_log(message, file):
 
 if __name__ == '__main__':
     mode = Mode.TRAIN
-    image_mode = ImageMode.RGB
+    # image_mode = ImageMode.RGB
+    image_mode = ImageMode.GRAY
     label_mode = ImageMode.GRAY
     use_existes_partition = True
     """
@@ -68,6 +69,8 @@ if __name__ == '__main__':
         #     'activation'    : 'softmax2d',
         #     'image_mode'    : image_mode,
         # }
+
+        # PSPNet Model
         # train_pars = {
         #     'n_classes'     : 10 + 1,
         #     'model_name'    : 'PSPNet',
@@ -75,13 +78,25 @@ if __name__ == '__main__':
         #     'activation'    : 'softmax2d',
         #     'image_mode'    : image_mode,
         # }
+
+        # DeepLab v3+ Model
+        # train_pars = {
+        #     'n_classes': 10 + 1,
+        #     'model_name': 'DeepLabv3+',
+        #     'backbone': 'efficientnet-b3',
+        #     'activation': 'softmax2d',
+        #     'image_mode': image_mode,
+        # }
+
+        # UNet++ Model
         train_pars = {
             'n_classes': 10 + 1,
-            'model_name': 'DeepLabv3+',
-            'backbone': 'efficientnet-b3',
+            'model_name': 'UNet++',
+            'backbone': 'resnext50_32x4d',
             'activation': 'softmax2d',
             'image_mode': image_mode,
         }
+
         main_log(f'Train pars:', mainLog_file)
         for key in train_pars.keys():
             main_log(f'{key}: {train_pars[key]}', mainLog_file)

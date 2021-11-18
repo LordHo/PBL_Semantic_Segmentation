@@ -7,21 +7,24 @@
     @Date   : 2019-03-07 18:45:06
 """
 """ pytorch """
+""" others """
+
+
+
+
 import torch
 import torch.nn.functional as F
 from torchvision import transforms
 from torch.utils.data import Dataset
-""" others """
 import os
 import PIL
 import random
 import numpy as np
 import albumentations as A
 from common import ImageMode
-
 class PredictDataset(Dataset):
-    def __init__(self, file_path, image_dir, resize=True, resize_height=512, resize_width=512, 
-                image_mode=ImageMode.RGB, label_mode=None):
+    def __init__(self, file_path, image_dir, resize=True, resize_height=512, resize_width=512,
+                 image_mode=ImageMode.RGB, label_mode=None):
         '''
         * param file_path: 數據文件TXT：格式：image_name.jpg label_name.jpg
         * param image_dir: 圖片路徑：image_dir + image_name.jpg 構成圖片的完整路徑
@@ -37,24 +40,24 @@ class PredictDataset(Dataset):
         self.resize_width = resize_width
         self.image_mode = image_mode
         self.label_mode = label_mode
- 
+
         self.toTensor = transforms.ToTensor()
- 
+
     def __getitem__(self, i):
         index = i % self.len
         image_name, _ = self.image_label_list[index]
-        
+
         image_path = os.path.join(self.image_dir, image_name)
-        image = self.load_data(image_path, self.resize_height, self.resize_width, isimage=True)
-        
+        image = self.load_data(
+            image_path, self.resize_height, self.resize_width, isimage=True)
+
         image = self.data_preproccess(image)
         return image, image_name
-        
- 
+
     def __len__(self):
         data_len = len(self.image_label_list)
         return data_len
- 
+
     def read_file(self, filename):
         image_label_list = []
         with open(filename, 'r') as f:
@@ -65,7 +68,7 @@ class PredictDataset(Dataset):
                 image_name, label_name = content
                 image_label_list.append((image_name, label_name))
         return image_label_list
- 
+
     def load_data(self, path, resize_height, resize_width, isimage):
         '''
             加載數據
@@ -96,19 +99,21 @@ class PredictDataset(Dataset):
                 label = label.convert('RGB')
                 assert label.mode == 'RGB'
             data = label
-        
+
         if self.resize:
-            data = data.resize((resize_height, resize_width), PIL.Image.NEAREST)
+            data = data.resize(
+                (resize_height, resize_width), PIL.Image.NEAREST)
         return data
- 
+
     def data_preproccess(self, image):
         image = self.toTensor(image)
         return image
- 
+
+
 class TrainDataset(PredictDataset):
-    def __init__(self, file_path, image_dir, label_dir, 
-                resize=True, resize_height=512, resize_width=512, 
-                repeat=1, n_classes=1, trans=True, image_mode=ImageMode.RGB, label_mode=ImageMode.GRAY):
+    def __init__(self, file_path, image_dir, label_dir,
+                 resize=True, resize_height=512, resize_width=512,
+                 repeat=1, n_classes=1, trans=True, image_mode=ImageMode.RGB, label_mode=ImageMode.GRAY):
         '''
         * param filename: 數據文件TXT：格式：image_name.jpg label_name.jpg
         * param image_dir: 圖片路徑：image_dir + image_name.jpg 構成圖片的完整路徑
@@ -118,7 +123,8 @@ class TrainDataset(PredictDataset):
             PS：當參數resize_height或resize_width其中一個為None時，可實現等比例缩放
         * param repeat: 所有樣本數據重複次数，默認循環一次，當repeat為None時，表示無限循環<sys.maxsize
         '''
-        PredictDataset.__init__(self, file_path, image_dir, resize, resize_height, resize_width)
+        PredictDataset.__init__(self, file_path, image_dir, resize,
+                                resize_height, resize_width, image_mode=image_mode, label_mode=label_mode)
         self.label_dir = label_dir
         self.repeat = repeat
         self.n_classes = n_classes
@@ -127,39 +133,41 @@ class TrainDataset(PredictDataset):
             add transforms for both image and label
         """
         self.toTrans = transforms.Compose([
-                transforms.ToTensor(),
-                transforms.RandomHorizontalFlip(p=0.5),
-                transforms.RandomVerticalFlip(p=0.5),
-                transforms.RandomRotation(degrees=(-10, 10), interpolation=transforms.InterpolationMode.NEAREST),
-            ])
+            transforms.ToTensor(),
+            transforms.RandomHorizontalFlip(p=0.5),
+            transforms.RandomVerticalFlip(p=0.5),
+            transforms.RandomRotation(
+                degrees=(-10, 10), interpolation=transforms.InterpolationMode.NEAREST),
+        ])
         """ 
             add transforms for only image
         """
         self.moreTransForImage = transforms.Compose([
             transforms.RandomAdjustSharpness(sharpness_factor=2),
         ])
- 
+
     def __getitem__(self, i):
         index = i % self.len
         image_name, label_name = self.image_label_list[index]
-        
+
         image_path = os.path.join(self.image_dir, image_name)
-        image = self.load_data(image_path, self.resize_height, self.resize_width, isimage=True)
-        
+        image = self.load_data(
+            image_path, self.resize_height, self.resize_width, isimage=True)
+
         label_path = os.path.join(self.label_dir, label_name)
-        label = self.load_data(label_path, self.resize_height, self.resize_width, isimage=False)
-        
+        label = self.load_data(
+            label_path, self.resize_height, self.resize_width, isimage=False)
+
         image, label = self.data_preproccess(image, label)
         return image, label, image_name, label_name
-        
- 
+
     def __len__(self):
         if self.repeat == None:
             data_len = 10000000
         else:
             data_len = len(self.image_label_list) * self.repeat
         return data_len
- 
+
     def data_preproccess(self, image, label):
         '''
             數據預處理
@@ -202,7 +210,3 @@ class TrainDataset(PredictDataset):
         label = toOneHot(label)
 
         return image, label
-
-
-
-
