@@ -46,7 +46,8 @@ def testing(file_path, image_dir, result_dir, model, epoch=None, image_mode=Imag
             output = model.model(x)
 
             if ensemble:
-                prediction_prob = ensemble_image(x, model_list, model.device)
+                prediction_prob = ensemble_image(
+                    x, model_list, model.device, image_mode=image_mode)
             else:
                 prediction_prob = output.cpu().numpy()
 
