@@ -1,39 +1,47 @@
 import cv2
 import time
 import numpy as np
-
 import torch
+
+from common import ImageMode
 
 stop_time = False
 stop_time_sec = 0.1
 
-def ensemble_image(img, model_list, device, flip_=True):
+
+def ensemble_image(img, model_list, device, flip_=True, image_mode=ImageMode.RGB):
     # print(f'img type: {type(img)}, img shape: {img.shape}')
     ensemble_final_result = None
     # print(f'ensemble_final_result type: {type(ensemble_final_result)}')
     for index, model in enumerate(model_list):
         # pr_img = model.predict(img) # keras
-        pr_img = model(img) # pytorch
+        pr_img = model(img)  # pytorch
         if stop_time:
             time.sleep(stop_time_sec)
         # print(f'pr_img type: {type(pr_img)}')
         pr_img = pr_img.cpu().numpy()
         ensemble_img = pr_img.copy()
         if ensemble_final_result is None:
-            ensemble_final_result = np.zeros(ensemble_img.shape, dtype=np.float64)
+            ensemble_final_result = np.zeros(
+                ensemble_img.shape, dtype=np.float64)
 
         if flip_:
             """ from tensor to numpy from device to cpu """
             img_ = img.cpu().numpy()
-            imgp = np.squeeze(img_)
+            imgp = np.squeeze(img_, axis=0)
 
             """ due to tensor is [c, h, w], but cv2 need [h, w, c] """
             imgp = imgp.transpose(1, 2, 0)
+            # print(f'imgp type: {type(imgp)}, imgp shape: {imgp.shape}')
             """ Horizontally flip """
             h_flip = cv2.flip(imgp, 1)
+            if image_mode == ImageMode.GRAY:
+                h_flip = np.expand_dims(h_flip, axis=(-1))
+            # print(f'h_flip type: {type(h_flip)}, h_flip shape: {h_flip.shape}')
             """ [h, w, c] -> [c, h, w] """
             h_flip = h_flip.transpose(2, 0, 1)
             h_flip = np.expand_dims(h_flip, axis=(0))
+            # print(f'h_flip type: {type(h_flip)}, h_flip shape: {h_flip.shape}')
             """ from numpy to tensor and also from cpu to device(which is model location) """
             h_flip_ = torch.tensor(h_flip)
             h_flip_ = h_flip_.to(device)
@@ -42,15 +50,17 @@ def ensemble_image(img, model_list, device, flip_=True):
                 time.sleep(stop_time_sec)
             """ from tensor to numpy from device to cpu """
             pre_h_flip_ = pre_h_flip.cpu().numpy()
-            pre_h_flip_ = np.squeeze(pre_h_flip_)
+            pre_h_flip_ = np.squeeze(pre_h_flip_, axis=0)
 
             pre_h_flip_ = pre_h_flip_.transpose(1, 2, 0)
             pre_h_flip_ = cv2.flip(pre_h_flip_, 1)
             h_flip = pre_h_flip_.transpose(2, 0, 1)
             # h_flip = pre_h_flip_
-            
+
             """ from tensor to numpy from device to cpu """
             v_flip = cv2.flip(imgp, 0)
+            if image_mode == ImageMode.GRAY:
+                v_flip = np.expand_dims(v_flip, axis=(-1))
             v_flip = v_flip.transpose(2, 0, 1)
             v_flip = np.expand_dims(v_flip, axis=(0))
             """ from numpy to tensor and also from cpu to device """
@@ -61,16 +71,17 @@ def ensemble_image(img, model_list, device, flip_=True):
                 time.sleep(stop_time_sec)
             """ from tensor to numpy from device to cpu """
             pre_v_flip_ = pre_v_flip.cpu().numpy()
-            pre_v_flip_ = np.squeeze(pre_v_flip_)
+            pre_v_flip_ = np.squeeze(pre_v_flip_, axis=0)
 
             pre_v_flip_ = pre_v_flip_.transpose(1, 2, 0)
             pre_v_flip_ = cv2.flip(pre_v_flip_, 0)
             v_flip = pre_v_flip_.transpose(2, 0, 1)
             # v_flip = pre_v_flip_
-            
-            
+
             """ from tensor to numpy from device to cpu """
             hv_flip = cv2.flip(imgp, -1)
+            if image_mode == ImageMode.GRAY:
+                hv_flip = np.expand_dims(hv_flip, axis=(-1))
             hv_flip = hv_flip.transpose(2, 0, 1)
             hv_flip = np.expand_dims(hv_flip, axis=(0))
             """ from numpy to tensor and also from cpu to device """
@@ -81,19 +92,19 @@ def ensemble_image(img, model_list, device, flip_=True):
                 time.sleep(stop_time_sec)
             """ from tensor to numpy from device to cpu """
             pre_hv_flip_ = pre_hv_flip.cpu().numpy()
-            pre_hv_flip_ = np.squeeze(pre_hv_flip_)
+            pre_hv_flip_ = np.squeeze(pre_hv_flip_, axis=0)
 
             pre_hv_flip_ = pre_hv_flip_.transpose(1, 2, 0)
             pre_hv_flip_ = cv2.flip(pre_hv_flip_, -1)
             hv_flip = pre_hv_flip_.transpose(2, 0, 1)
             # hv_flip = pre_hv_flip_
-            
+
     # divide first
             ensemble_img = (pr_img + h_flip + v_flip + hv_flip)/4
         ensemble_final_result = ensemble_final_result + ensemble_img
     ensemble_final_result = ensemble_final_result/(index + 1)
     # divide after
-            # print(pr_img.shape, h_flip.shape, v_flip.shape, hv_flip.shape)
+    # print(pr_img.shape, h_flip.shape, v_flip.shape, hv_flip.shape)
     #         ensemble_img = (pr_img + h_flip + v_flip + hv_flip)
     #     ensemble_final_result = ensemble_final_result + ensemble_img
     # ensemble_final_result = ensemble_final_result/(index + 1)/4
