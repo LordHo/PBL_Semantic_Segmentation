@@ -1,30 +1,32 @@
 from tqdm import tqdm
 
 from torch.utils.data import DataLoader
-
+import numpy as np
 from common import *
 from dataset import *
 from ensemble import ensemble_image
 from draw import drawColor
 
+
 def load_weight(path):
     return torch.load(path)
 
+
 def predicting(file_path, image_dir, result_dir, load_weight_path_list=None, device='cpu', image_mode=ImageMode.RGB):
     dataset_pars = {
-        'file_path'     : file_path,
-        'image_dir'     : image_dir, 
-        'resize'        : True,
-        'resize_height' : 512,
-        'resize_width'  : 512,
-        'image_mode'    : image_mode,
+        'file_path': file_path,
+        'image_dir': image_dir,
+        'resize': True,
+        'resize_height': 512,
+        'resize_width': 512,
+        'image_mode': image_mode,
     }
     predict_dateset = PredictDataset(**dataset_pars)
 
     predict_loader_pars = {
-        'dataset'   : predict_dateset,
+        'dataset': predict_dateset,
         'batch_size': 1,
-        'shuffle'   : False
+        'shuffle': False
     }
     predict_dataloader = DataLoader(**predict_loader_pars)
 
@@ -45,9 +47,10 @@ def predicting(file_path, image_dir, result_dir, load_weight_path_list=None, dev
             x = image.to(device)
 
             output = model(x)
-    
+
             if ensemble:
-                prediction_prob = ensemble_image(x, model_list, device)
+                prediction_prob = ensemble_image(
+                    x, model_list, device, image_mode=image_mode)
             else:
                 prediction_prob = output.cpu().numpy()
 
