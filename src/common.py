@@ -93,8 +93,9 @@ class Model(ModelSetting):
         self.model.to(self.device)
 
     def set_optimizer(self):
-        # lr = 5e-4
-        lr = 1e-4
+        # lr = 1e-3
+        # lr = 1e-4
+        lr = 8e-5
         weight_decay = lr*0.1
 
         # optimizer = optim.SGD(model.parameters(), lr=1e-3, momentum=0.9)
@@ -126,7 +127,8 @@ class Model(ModelSetting):
                 return third_lr
 
         # lambda_lr = lambda epoch: 1.0 if epoch < 20 else 0.8**((epoch-20)//3)
-        scheduler = optim.lr_scheduler.LambdaLR(self.optimizer, lambda_lr)
+        # scheduler = optim.lr_scheduler.LambdaLR(self.optimizer, lambda_lr)
+        scheduler = optim.lr_scheduler.LambdaLR(self.optimizer, lambda x: 1.0)
         return scheduler
 
 
