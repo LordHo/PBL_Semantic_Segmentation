@@ -64,13 +64,13 @@ if __name__ == '__main__':
         main_log(f'Total Folder Number: {k}', mainLog_file)
 
         # U-Net Model
-        # train_pars = {
-        #     'n_classes'     : 10 + 1,
-        #     'model_name'    : 'UNet',
-        #     'backbone'      : 'efficientnet-b3',
-        #     'activation'    : 'softmax2d',
-        #     'image_mode'    : image_mode,
-        # }
+        train_pars = {
+            'n_classes': 10 + 1,
+            'model_name': 'UNet',
+            'backbone': 'efficientnet-b3',
+            'activation': 'softmax2d',
+            'image_mode': image_mode,
+        }
 
         # PSPNet Model
         # train_pars = {
@@ -91,13 +91,13 @@ if __name__ == '__main__':
         # }
 
         # UNet++ Model
-        train_pars = {
-            'n_classes': 10 + 1,
-            'model_name': 'UNet++',
-            'backbone': 'resnext50_32x4d',
-            'activation': 'softmax2d',
-            'image_mode': image_mode,
-        }
+        # train_pars = {
+        #     'n_classes': 10 + 1,
+        #     'model_name': 'UNet++',
+        #     'backbone': 'resnext50_32x4d',
+        #     'activation': 'softmax2d',
+        #     'image_mode': image_mode,
+        # }
 
         main_log(f'Train pars:', mainLog_file)
         for key in train_pars.keys():

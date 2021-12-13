@@ -157,7 +157,7 @@ def training(file_path, image_dir, label_dir, result_dir, model, image_mode, lab
         'resize_width': 512,
         'repeat': 20,
         # 'repeat': 1, # for test use
-        'n_classes': 10+1,
+        'n_classes': 10 + 1,
         'trans': True,
         'image_mode': image_mode,
         'label_mode': label_mode,
