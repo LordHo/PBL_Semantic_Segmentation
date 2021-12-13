@@ -4,19 +4,23 @@ src/*.txt
 src/UNet_Version/loss/msssimLoss.py
 src/UNet_Version/models
 
-special partitions
+special partitions/Include_Double_Row_148_image
+special partitions/Single_Row_132_image
+special partitions/partition.ipynb
 
 result
 
 dataset/14X label
+dataset/train
+dataset/pre_train
 dataset/static_data_sitution.ipynb
 
 *__pycache__
 *.PNG
 *.pyc
 *.zip
-*.csv
-*.txt
+# *.csv
+# *.txt
 *.json
 *.jpg
 *.psd
