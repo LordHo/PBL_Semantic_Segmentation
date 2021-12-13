@@ -1,5 +1,4 @@
 compute_IoU
-dataset
 redraw
 src/*.txt
 src/UNet_Version/loss/msssimLoss.py
@@ -9,6 +8,17 @@ special partitions
 
 result
 
+dataset/14X label
+dataset/static_data_sitution.ipynb
+
 *__pycache__
 *.PNG
 *.pyc
+*.zip
+*.csv
+*.txt
+*.json
+*.jpg
+*.psd
+*.ini
+*.xlsx
