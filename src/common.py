@@ -134,6 +134,6 @@ class Model(ModelSetting):
 
 def createDir(dir_path):
     if not os.path.exists(dir_path):
-        os.mkdir(dir_path)
+        os.makedirs(dir_path)
     # else:
     #     print(f'Dir: {dir_path} is already existed!')

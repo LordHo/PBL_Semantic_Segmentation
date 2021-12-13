@@ -1,4 +1,5 @@
 from tqdm import tqdm
+import time
 
 from torch.utils.data import DataLoader
 
@@ -91,7 +92,6 @@ class EpochInfo:
 
 
 def epoch_training(epoch, model, dataloader, loss, epoch_info):
-    import time
 
     epoch_info.resetepochloss()
     epoch_info.reset()
@@ -146,6 +146,7 @@ def epoch_training(epoch, model, dataloader, loss, epoch_info):
 def training(file_path, image_dir, label_dir, result_dir, model, image_mode, label_mode):
 
     print(f'Device: {model.device}')
+    # training image size need to change in following resize_height and resize_width
 
     dataset_pars = {
         'file_path': file_path,

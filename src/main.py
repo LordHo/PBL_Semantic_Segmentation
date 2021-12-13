@@ -36,15 +36,17 @@ if __name__ == '__main__':
     main_log(f'Image Dir: {image_dir}', mainLog_file)
 
     if mode == Mode.TRAIN:
-        k = 3
         label_dir = os.path.join(train_root_dir, 'labels')
         print(f'Label Dir: {label_dir}')
         main_log(f'Label Dir: {label_dir}', mainLog_file)
 
         valid = True if Dataset.VALID in datasets else False
         test = True if Dataset.TEST in datasets else False
+
         " test only when single dir can remove, if k fold will at least a pratition be testing data "
         if not use_existes_partition:
+            # k is the k-fold splited number, k default as None, means k = 1
+            k = 5
             split_data(mode, result_dir, image_dir,
                        label_dir=label_dir, k=k, valid=valid, test=test)
         else:
@@ -133,7 +135,9 @@ if __name__ == '__main__':
             raise "k value is wrong"
 
     elif mode == Mode.PREDICT:
+        # fold name is for saved model weights
         fold_name = '2021-10-07 16-09-05-copy(JingPing+BCE)'
+        # k in split_data is None, means will pred all images in image_dir
         split_data(mode, result_dir, image_dir)
 
         predict_file_path = os.path.join(result_dir, 'predict.txt')
