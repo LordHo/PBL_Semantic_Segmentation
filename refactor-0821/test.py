@@ -3,7 +3,7 @@ import numpy as np
 from torch.utils.data import DataLoader
 
 from common import *
-from dataset import *
+from .dataset import *
 from ensemble import ensemble_image
 from draw import drawColor
 

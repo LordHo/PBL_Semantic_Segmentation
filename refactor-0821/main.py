@@ -1,10 +1,11 @@
 import os
 import time
+import glob
 
 from common import *
 from split_data import split_data, only_assign_k_fold, copy_partitions
 from train import training
-from test import testing
+from .test import testing
 from predict import predicting
 
 
@@ -13,11 +14,12 @@ def main_log(message, file):
 
 
 if __name__ == '__main__':
-    mode = Mode.TRAIN
-    # image_mode = ImageMode.RGB
-    image_mode = ImageMode.GRAY
+    mode = Mode.PREDICT
+    image_mode = ImageMode.RGB
+    # image_mode = ImageMode.GRAY
     label_mode = ImageMode.GRAY
     use_existes_partition = True
+    use_special_predict_list = False
     """
         TEST only when after TRAIN, if only want TEST, use PREDICT instead
     """
@@ -32,6 +34,10 @@ if __name__ == '__main__':
 
     train_root_dir = os.path.join('..', 'dataset', 'modify_single_train')
     image_dir = os.path.join(train_root_dir, 'images')
+
+    pred_image_dir = os.path.join('..', 'dataset', '2511')
+    image_dir = pred_image_dir
+
     print(f'Image Dir: {image_dir}')
     main_log(f'Image Dir: {image_dir}', mainLog_file)
 
@@ -133,22 +139,34 @@ if __name__ == '__main__':
             raise "k value is wrong"
 
     elif mode == Mode.PREDICT:
-        fold_name = '2021-10-07 16-09-05-copy(JingPing+BCE)'
-        split_data(mode, result_dir, image_dir)
+        # DeepLabv3+
+        # fold_name = '2021-11-14 13-33-17-DeepLabv3+'
 
-        predict_file_path = os.path.join(result_dir, 'predict.txt')
-        load_weight_path_list = [
-            os.path.join('..', 'result', fold_name, 'fold 1',
-                         'save_model', 'UNet-best.pkl'),
-            os.path.join('..', 'result', fold_name, 'fold 2',
-                         'save_model', 'UNet-best.pkl'),
-            os.path.join('..', 'result', fold_name, 'fold 3',
-                         'save_model', 'UNet-best.pkl'),
-            os.path.join('..', 'result', fold_name, 'fold 4',
-                         'save_model', 'UNet-best.pkl'),
-            os.path.join('..', 'result', fold_name, 'fold 5',
-                         'save_model', 'UNet-best.pkl'),
-        ]
+        # Unet
+        fold_name = '2021-10-27 19-29-14-JingPing+BCE-OnlySingle(132)-fold(9)'
+
+        if use_special_predict_list:
+            predict_file_path = os.path.join(
+                '..', 'result', '2021-11-17 22-14-06', 'partition 1.txt')
+        else:
+            split_data(mode, result_dir, image_dir)
+            predict_file_path = os.path.join(result_dir, 'predict.txt')
+
+        # load_weight_path_list = [
+        #     os.path.join('..', 'result', fold_name, 'fold 1',
+        #                  'save_model', 'UNet++-best.pkl'),
+        # ]
+
+        load_weight_path_list = []
+        for i in range(1, 9+1):
+
+            model_path = os.path.join(
+                '..', 'result', fold_name, f'fold {i}', 'save_model', '*.pkl')
+
+            model_path = glob.glob(model_path)[0]
+            load_weight_path_list.append(model_path)
+            print(model_path)
+
         device = torch.device("cuda" if torch.cuda.is_available() else "cpu")
         predicting(predict_file_path, image_dir, result_dir,
                    load_weight_path_list, device, image_mode)

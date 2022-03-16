@@ -6,11 +6,6 @@
     @E-mail : pan_jinquan@163.com
     @Date   : 2019-03-07 18:45:06
 """
-""" pytorch """
-""" others """
-
-
-
 
 import torch
 import torch.nn.functional as F
@@ -20,8 +15,10 @@ import os
 import PIL
 import random
 import numpy as np
-import albumentations as A
+# import albumentations as A
 from common import ImageMode
+
+
 class PredictDataset(Dataset):
     def __init__(self, file_path, image_dir, resize=True, resize_height=512, resize_width=512,
                  image_mode=ImageMode.RGB, label_mode=None):

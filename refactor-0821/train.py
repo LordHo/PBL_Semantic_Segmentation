@@ -3,7 +3,7 @@ from tqdm import tqdm
 from torch.utils.data import DataLoader
 
 from common import *
-from dataset import *
+from .dataset import *
 from loss import Loss
 from test import testing
 

@@ -3,7 +3,7 @@ from tqdm import tqdm
 from torch.utils.data import DataLoader
 import numpy as np
 from common import *
-from dataset import *
+from .dataset import *
 from ensemble import ensemble_image
 from draw import drawColor
 
